@@ -1,7 +1,24 @@
 const { MongoClient } = require("mongodb");
 
 // The uri string must be the connection string for the database (obtained on Atlas).
-const uri = "mongodb+srv://<user>:<password>@ckmdb.5oxvqja.mongodb.net/?retryWrites=true&w=majority";
+const uri = "mongodb+srv://christopherwalters_db_user:<db_password>@cluster0.lxbtqt6.mongodb.net/?appName=Cluster0";
+// Make sure the package.json contains:
+//   "dependencies": {
+//    "express": "^4.18.2",
+//    "mongodb": "^5.1.0"
+
+// Alternatively, to not expose the access keys, you may do:
+// MUST RUN: npm install dotenv  ON CONSOLE to begin
+// require('dotenv').config();  // To make the environment vars work, package.json must contain dependency-> "dotenv": "^16.0.0"
+// Then get the parameters hidden in .env do:
+// Do this=> const uri = process.env.mongo_uri;
+// We have also hidden the access keys in .env so alternatively we may use them:
+// so in this case, do these =>
+// const user = process.env.user;
+// const paswd = process.env.paswd;
+// uri = "mongodb+srv://" + user +":"+ paswd +"@ckmdb.5oxvqja.mongodb.net/?retryWrites=true&w=majority";
+
+
 
 // --- This is the standard stuff to get it to work on the browser
 const express = require('express');
@@ -17,7 +34,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Default route:
 app.get('/', function(req, res) {
-  res.send('Starting... ');
+  const myquery = req.query;
+  var outstring = 'Starting... ';
+  res.send(outstring);
 });
 
 app.get('/say/:name', function(req, res) {
@@ -26,6 +45,7 @@ app.get('/say/:name', function(req, res) {
 
 
 // Route to access database:
+// Example: URL/api/mongo/12345
 app.get('/api/mongo/:item', function(req, res) {
 const client = new MongoClient(uri);
 const searchKey = "{ partID: '" + req.params.item + "' }";
@@ -38,7 +58,8 @@ async function run() {
 
     // Hardwired Query for a part that has partID '12345'
     // const query = { partID: '12345' };
-    // But we will use the parameter provided with the route
+    // But we will use the parameter provided with the route: URL/api/mongo/12345
+    
     const query = { partID: req.params.item };
 
     const part = await parts.findOne(query);
@@ -52,3 +73,5 @@ async function run() {
 }
 run().catch(console.dir);
 });
+
+
